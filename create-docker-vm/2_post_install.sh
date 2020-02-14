@@ -84,3 +84,5 @@ yum install -y yum-utils
 
 yum install -y "libXss.so.1()(64bit)"
 yum install -y git
+
+yum remove -y totem
