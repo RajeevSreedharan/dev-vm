@@ -81,3 +81,5 @@ yum install -y targetcli
 yum install -y smartmontools
 yum install -y sysstat
 yum install -y yum-utils
+
+yum remove -y totem
