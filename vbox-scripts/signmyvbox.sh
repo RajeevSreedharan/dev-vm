@@ -31,6 +31,34 @@ checkInput() {
 
 # Pre-requisites, if not already installed 
 preinstall() {
+    sudo dnf -q list installed kernel-uek >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        sudo dnf -y install kernel-uek
+        [ $? -ne 0 ] && echo "ERROR" && return -1
+    fi
+    sudo dnf -q list installed kernel-uek-devel >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        sudo dnf -y install kernel-uek-devel
+        [ $? -ne 0 ] && echo "ERROR" && return -1
+    fi
+    sudo dnf -q list installed keyutils >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        sudo dnf -y install keyutils
+        [ $? -ne 0 ] && echo "ERROR" && return -1
+    fi
+    sudo dnf -q list installed mokutil >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        sudo dnf -y install mokutil
+        [ $? -ne 0 ] && echo "ERROR" && return -1
+    fi
+    sudo dnf -q list installed pesign >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        sudo dnf -y install pesign
+        [ $? -ne 0 ] && echo "ERROR" && return -1
+    fi
+
+    echo "[Step 2 of 4] Prequisite installation complete"
+
     return 0
 }
 
