@@ -29,7 +29,50 @@ enrollCert() {
 
 signDetailsUI()
 {
+OUTPUT=$(zenity --forms --title="Sign my VirtualBox" \
+    --text="Enter details here" \
+    --separator="," \
+    --add-entry="Organization" \
+    --add-entry="Common Name (e.g. abc.com)" \
+    --add-entry="Email" 2>/dev/null)
 
+rc=$?
+case $rc in
+0)
+    echo "Processing.."
+    checkInput
+    rc2=$?
+    if [ "$rc2" == "0" ]; then
+        preinstall
+        rc2=$?
+        if [ "$rc2" == "0" ]; then
+            createLocalCert
+            rc2=$?
+            if [ "$rc2" == "0" ]; then
+                enrollCert
+                rc2=$?
+                if [ "$rc2" == "0" ]; then
+                    zenity --info --width=400 \
+                    --text="Next steps:\n1. Reboot. MOK management will automatically pop.\n2. Select Enroll MOK\n3. Select Continue" 2>/dev/null
+    
+                    echo "Done."
+                fi
+            fi
+        fi
+    fi
+    ;;
+
+1)
+    echo "User cancelled"
+    ;;
+-1)
+    echo "An unexpected error has occurred."
+    ;;
+esac
+
+if [ $rc -ne 0 ]; then
+    echo $rc
+fi
 }
 
 signDetailsUI
