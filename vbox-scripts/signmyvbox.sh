@@ -64,11 +64,50 @@ preinstall() {
 
 # Create local certificates and sign the module
 createLocalCert() {
+
+    cat >>/tmp/x509.conf <<EOF
+[ req ]
+default_bits = 4096
+distinguished_name = req_distinguished_name
+prompt = no
+string_mask = utf8only
+x509_extensions = extensions
+
+[ req_distinguished_name ]
+O = $myorg
+CN = $myorgkey
+emailAddress = $myemail
+
+[ extensions ]
+basicConstraints=critical,CA:FALSE
+keyUsage=digitalSignature
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid
+EOF
+
+    mkdir ~/certs
+    cd ~/certs
+    openssl req -x509 -new -nodes -utf8 -sha512 -days 3650 -batch -config /tmp/x509.conf -outform DER -out pubkey.der -keyout priv.key
+
+    openssl x509 -inform DER -in pubkey.der -out pubkey.pem
+    openssl pkcs12 -export -inkey priv.key -in pubkey.pem -name cert -out cert.p12
+
+    cd ~/certs
+    for module in $(dirname $(modinfo -n vboxdrv))/*.ko; do
+        sudo /usr/src/kernels/$(uname -r)/scripts/sign-file sha512 priv.key pubkey.der "${module}"
+    done
+
+    modinfo vboxdrv
+    echo "[Step 3 of 4] Certificate creation complete"
+
     return 0
 }
 
 # Enroll the certificate into the UEFI Secure Boot key database
 enrollCert() {
+    sudo mokutil --import pubkey.der
+    echo "[Step 4 of 4] Certificate enrollment complete"
+
     return 0
 }
 
@@ -78,7 +117,7 @@ OUTPUT=$(zenity --forms --title="Sign my VirtualBox" \
     --text="Enter details here" \
     --separator="," \
     --add-entry="Organization" \
-    --add-entry="Common Name (e.g. abc.com)" \
+    --add-entry="Common Name (e.g. oracle.com)" \
     --add-entry="Email" 2>/dev/null)
 
 rc=$?
