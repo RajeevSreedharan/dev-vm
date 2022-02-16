@@ -9,6 +9,23 @@
 
 # Validate user inputs (Organization, Common name (FQDN) and email)
 checkInput() {
+
+    myorg=$(awk -F, '{print $1}' <<<$OUTPUT)
+    if [ -z "$myorg" ]; then
+        zenity --error --text="Organization cannot be blank" 2>/dev/null
+        return -1
+    fi
+    myorgkey=$(awk -F, '{print $2}' <<<$OUTPUT)
+    if [ -z "$myorgkey" ]; then
+        zenity --error --text="Common name cannot be blank" 2>/dev/null
+        return -1
+    fi
+    myemail=$(awk -F, '{print $3}' <<<$OUTPUT)
+    if [ -z "$myemail" ]; then
+        zenity --error --text="Email cannot be blank" 2>/dev/null
+        return -1
+    fi
+
     return 0
 }
 
